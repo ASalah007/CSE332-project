@@ -1,5 +1,6 @@
-import java.util.ArrayList;
-import java.util.Scanner;
+package solution1;
+
+import java.util.*;
 
 public class PegSolitaireSolver {
     final private static boolean RIGHT = true;
@@ -7,17 +8,17 @@ public class PegSolitaireSolver {
 
     public static void main(String[] args) {
 
-        while (true){
+        while (true) {
             Scanner sc = new Scanner(System.in);
             int BOARD_SIZE;
-            System.out.print("The board size (have to be even number) = ");
+            System.out.print("The board size (have to be even number or 3 to be solved) = ");
             BOARD_SIZE = sc.nextInt();
             while (!(BOARD_SIZE == 3 || BOARD_SIZE % 2 == 0)) {
-                System.out.println("board size have to be even number");
-                System.out.print("The board size (have to be even number) = ");
+                System.out.println("board size have to be even number or 3");
+                System.out.print("The board size = ");
                 BOARD_SIZE = sc.nextInt();
             }
-            System.out.print("The position of the empty slot from 1 to " + BOARD_SIZE +" is ");
+            System.out.print("The position of the empty slot from 1 to " + BOARD_SIZE + " is ");
             int BLANK_INIT_POS = sc.nextInt();
             boolean reversed = false;
 
@@ -38,58 +39,76 @@ public class PegSolitaireSolver {
                 System.out.println("This board is unsolvable");
 
             else {
+                System.out.println("//****************************************************//");
                 System.out.println("The solution is ");
-                if (reversed) {
+                System.out.println();
+                if (!reversed) {
                     for (int k = 0; k < al.size(); k++) {
-                        System.out.print("Step " + k + ": \t");
-                        for (int i = BOARD_SIZE; i > 0; i--) {
+                        System.out.print("Step " + k + " : ");
+                        for (int i = 1; i <= BOARD_SIZE; i++) {
                             System.out.print(al.get(k).get(i) + "\t");
                         }
                         System.out.println();
                     }
                 } else {
                     for (int k = 0; k < al.size(); k++) {
-                        System.out.print("Step " + k + ": \t");
-                        for (int i = 1; i <= BOARD_SIZE; i++) {
+                        System.out.print("Step " + k + " : ");
+                        for (int i = BOARD_SIZE; i > 0; i--) {
                             System.out.print(al.get(k).get(i) + "\t");
                         }
                         System.out.println();
                     }
                 }
+                System.out.println("//****************************************************//");
             }
         }
     }
 
     public static ArrayList<ArrayList<Integer>> solveBoard(ArrayList<Integer> board, int BLANK_INIT_POS) {
-        if (BLANK_INIT_POS != 2 && board.size() == 4) {
+        final int BOARD_SIZE = board.size() - 1;
+        if (BLANK_INIT_POS != 2 && BOARD_SIZE == 3) {
             ArrayList<ArrayList<Integer>> aal = new ArrayList<>();
             aal.add(new ArrayList<>(board));
             if (validateMove(board, 3, LEFT)) {
-                board = move(board, 3, LEFT);
+                move(board, 3, LEFT);
             } else {
-                board = move(board, 1, RIGHT);
+                move(board, 1, RIGHT);
             }
             aal.add(new ArrayList<>(board));
             return aal;
-        } else if (BLANK_INIT_POS == 2 && board.size() != 4) {
-            return solveBoard(board);
+        } else if ((BLANK_INIT_POS == 2 && BOARD_SIZE != 3)
+                || (BLANK_INIT_POS == 5 && BOARD_SIZE != 4)) {
+            return solveBoardInner(board, BLANK_INIT_POS);
         } else {
             return null;
         }
     }
 
-    private static ArrayList<ArrayList<Integer>> solveBoard(ArrayList<Integer> board) {
+    private static ArrayList<ArrayList<Integer>> solveBoardInner(ArrayList<Integer> board, int BLANK_POS) {
 
         ArrayList<ArrayList<Integer>> solution = new ArrayList<>();
         int noOfConversions = 0;
-        boolean direction = LEFT;
         final int BOARD_SIZE = board.size() - 1;
-        int nextMove = 4;
 
         solution.add(new ArrayList<>(board));
+
+        int nextMove;
+        boolean direction;
+        if (BLANK_POS == 2) {
+            nextMove = BLANK_POS + 2;
+            direction = LEFT;
+        } else {
+            if (validateMove(board, 3, RIGHT)) {
+                move(board, 3, RIGHT);
+            }
+            nextMove = BLANK_POS + 1;
+            direction = LEFT;
+            noOfConversions++;
+            solution.add(new ArrayList<>(board));
+        }
         while (noOfConversions < BOARD_SIZE - 2) {
             if (validateMove(board, nextMove, direction)) {
-                board = move(board, nextMove, direction);
+                move(board, nextMove, direction);
                 if (nextMove + 2 > BOARD_SIZE) {
                     nextMove = 1;
                     direction = RIGHT;
@@ -113,7 +132,7 @@ public class PegSolitaireSolver {
         }
     }
 
-    private static ArrayList<Integer> move(ArrayList<Integer> board, int pos, boolean direction) {
+    private static void move(ArrayList<Integer> board, int pos, boolean direction) {
         if (direction == LEFT) {
             board.set(pos, 0);
             board.set(pos - 1, 0);
@@ -123,6 +142,35 @@ public class PegSolitaireSolver {
             board.set(pos + 1, 0);
             board.set(pos + 2, 1);
         }
-        return board;
+    }
+
+    private static int setBitOne(int num, int pos) {
+        return num |= (1 << pos);
+    }
+
+    private static int setBitZero(int num, int pos) {
+        return num &= ~(1 << pos);
+    }
+
+    private static int setBoard(int SIZE, int blank_pos) {
+        int num = 0;
+        for (int i = 1; i <= SIZE; i++) {
+            num |= (1 << i);
+        }
+        num &= ~(1 << blank_pos);
+
+        return num;
+    }
+
+    private static ArrayList<Integer> getBits(int num, int BOARD_SIZE) {
+        ArrayList<Integer> intAL = new ArrayList<>();
+        int temp = 0;
+
+        intAL.add(0, temp);
+        for (int i = 1; i <= BOARD_SIZE; i++) {
+            temp = (num & (1 << i)) >> i;
+            intAL.add(i, temp);
+        }
+        return intAL;
     }
 }

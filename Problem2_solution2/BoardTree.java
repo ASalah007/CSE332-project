@@ -80,7 +80,7 @@ public class BoardTree {
 
         public static void showBoard(Board b) {
             for (int i = 1;  i < b.boardAL.size(); i++) {
-                System.out.print(b.boardAL.get(i) + "\t");
+                System.out.printf("%2d\t", b.boardAL.get(i));
             }
         }
     }
@@ -144,7 +144,7 @@ public class BoardTree {
                 System.out.println();
                 int i = 0;
                 for (Board b : arrBoard) {
-                    System.out.print("Step " + i++ + " : ");
+                    System.out.printf("Step %2d :\t", i++);
                     Board.showBoard(b);
                     System.out.println();
                 }
@@ -164,7 +164,7 @@ public class BoardTree {
                     System.out.println();
                     int i = 0;
                     for (Board b : arrBoard) {
-                        System.out.print("Step " + i++ + " : ");
+                        System.out.printf("Step %2d :\t", i++);
                         Board.showBoard(b);
                         System.out.println();
                     }

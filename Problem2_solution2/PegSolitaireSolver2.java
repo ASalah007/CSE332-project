@@ -1,9 +1,10 @@
 import java.util.*;
 
-public class PegSolitaireSolver2 {
+public class PegSolitaireSolver {
     final private static boolean RIGHT = true;
     final private static boolean LEFT = false;
-    private Set<Long> memory;
+    final private int BOARD_SIZE;
+    private Set<BitSet> memory;
     BoardTree.Board initialBoard;
     BoardTree BT;
 
@@ -21,91 +22,142 @@ public class PegSolitaireSolver2 {
             System.out.print("The position of the empty slot from 1 to " + BOARD_SIZE + " is ");
             int BLANK_INIT_POS = sc.nextInt();
 
-            PegSolitaireSolver2 pss = new PegSolitaireSolver2(BOARD_SIZE, BLANK_INIT_POS);
-            ArrayList<ArrayList<BoardTree.Board>> soln = pss.getSolution();
 
-            BoardTree.showCompleteSolution(soln, BOARD_SIZE - 1);
+            System.out.println("Press 1 to show solutions");
+            System.out.println("Press 2 to show all tries");
+
+            int choice = sc.nextInt();
+            while (choice != 1 && choice != 2) {
+                System.out.println("Press 1 to show solutions");
+                System.out.println("Press 2 to show all tries");
+                choice = sc.nextInt();
+            }
+
+            PegSolitaireSolver pss = new PegSolitaireSolver(BOARD_SIZE, BLANK_INIT_POS);
+
+            while (true) {
+                if (choice == 1)
+                    pss.showSolutions();
+                else
+                    pss.showTries();
+
+                System.out.println("Press 1 to show solutions");
+                System.out.println("Press 2 to show all tries");
+                System.out.println("Press 3 to enter another board");
+                choice = sc.nextInt();
+                if (choice == 3)
+                    break;
+            }
         }
     }
 
-    public PegSolitaireSolver2(int BOARD_SIZE, int BLANK_INIT_POS) {
+    public PegSolitaireSolver(int BOARD_SIZE, int BLANK_INIT_POS) {
+        this.BOARD_SIZE = BOARD_SIZE;
         solveBoard(BOARD_SIZE, BLANK_INIT_POS);
+        BT.traverseTree();
+    }
+
+    public Comparator<BitSet> BitSetComparator() {
+        return (p1, p2) -> {
+            if (p1.size() > p2.size())
+                return 1;
+            else if (p1.size() < p2.size())
+                return -1;
+            else {
+                for (int i = p1.size() - 1; i >= 0; i--)
+                    if ((p1.get(i) ^ p2.get(i)) && p1.get(i))
+                        return 1;
+                    else if ((p1.get(i) ^ p2.get(i)) && p2.get(i))
+                        return -1;
+                return 0;
+            }
+        };
     }
 
     public void solveBoard(int BOARD_SIZE, int BLANK_INIT_POS) {
-        ArrayList<Integer> boardALInt = new ArrayList<>();
 
-        for (int i = 0; i <= BOARD_SIZE; i++) {
-            boardALInt.add(i, 1);
-        }
-        boardALInt.set(BLANK_INIT_POS, 0);
+        // creation of the first BitSet to make the initial board
+        BitSet boardBitSet = new BitSet();
+        for (int i = 1; i <= BOARD_SIZE; i++)
+            boardBitSet.set(i, true);
+        boardBitSet.set(BLANK_INIT_POS, false);
 
-        initialBoard = new BoardTree.Board(boardALInt);
+        initialBoard = new BoardTree.Board(boardBitSet, BOARD_SIZE);
         BT = new BoardTree(initialBoard);
-        memory = new TreeSet<>();
-        memory.add(initialBoard.getBoardINT());
-
+        memory = new TreeSet<>(BitSetComparator());
+        memory.add(boardBitSet);
 
         solveBoard(initialBoard);
+    }
 
+    public static BitSet makeNewBitSet(BitSet oldBitSet, int withSize) {
+        BitSet newBitSet = new BitSet();
+        for (int i = 0; i <= withSize; i++)
+            newBitSet.set(i, oldBitSet.get(i));
+
+        return newBitSet;
     }
 
     public void solveBoard(BoardTree.Board node) {
-        // try move left
-        int BOARD_SIZE = node.getBoardAL().size() - 1;
+
         BoardTree.Board tryBoard;
-        ArrayList<Integer> tryAL;
-
+        BitSet tryBitSet;
+        // tries moving all pegs to the right of the board
         for (int i = 3; i <= BOARD_SIZE; i++) {
-            if (validateMove(node.getBoardAL(), i, LEFT)) {
-                tryAL = new ArrayList<>(node.getBoardAL());
-                move(tryAL, i, LEFT);
-                tryBoard = new BoardTree.Board(tryAL);
-                if (!memory.contains(tryBoard.getBoardINT())) {
+            if (validateMove(node.getBoardBitSet(), i, RIGHT)) {
+                tryBitSet = makeNewBitSet(node.getBoardBitSet(), BOARD_SIZE);
+                move(tryBitSet, i, RIGHT);
+                tryBoard = new BoardTree.Board(tryBitSet, BOARD_SIZE);
+                if (!memory.contains(tryBoard.getBoardBitSet())) {
                     node.addChild(tryBoard);
-                    memory.add(tryBoard.getBoardINT());
+                    memory.add(tryBoard.getBoardBitSet());
                     solveBoard(tryBoard);
                 }
             }
         }
+        // tries moving all pegs to the left of the board
         for (int i = 1; i <= BOARD_SIZE - 2; i++) {
-            if (validateMove(node.getBoardAL(), i, RIGHT)) {
-                tryAL = new ArrayList<>(node.getBoardAL());
-                move(tryAL, i, RIGHT);
-                tryBoard = new BoardTree.Board(tryAL);
-                if (!memory.contains(tryBoard.getBoardINT())) {
+            if (validateMove(node.getBoardBitSet(), i, LEFT)) {
+                tryBitSet = makeNewBitSet(node.getBoardBitSet(), BOARD_SIZE);
+                move(tryBitSet, i, LEFT);
+                tryBoard = new BoardTree.Board(tryBitSet, BOARD_SIZE);
+                if (!memory.contains(tryBoard.getBoardBitSet())) {
                     node.addChild(tryBoard);
-                    memory.add(tryBoard.getBoardINT());
+                    memory.add(tryBoard.getBoardBitSet());
                     solveBoard(tryBoard);
                 }
             }
         }
     }
 
-    private boolean validateMove(ArrayList<Integer> board, int pos, boolean direction) {
+    private boolean validateMove(BitSet board, int pos, boolean direction) {
         if (direction == LEFT) {
-            return board.get(pos) == 1
-                    && board.get(pos - 1) == 1 && board.get(pos - 2) == 0;
+            return board.get(pos)
+                    && board.get(pos + 1) && !board.get(pos + 2);
         } else {
-            return board.get(pos) == 1
-                    && board.get(pos + 1) == 1 && board.get(pos + 2) == 0;
+            return board.get(pos)
+                    && board.get(pos - 1) && !board.get(pos - 2);
         }
     }
 
-    private ArrayList<Integer> move(ArrayList<Integer> board, int pos, boolean direction) {
+    private BitSet move(BitSet board, int pos, boolean direction) {
         if (direction == LEFT) {
-            board.set(pos, 0);
-            board.set(pos - 1, 0);
-            board.set(pos - 2, 1);
+            board.set(pos, false);
+            board.set(pos + 1, false);
+            board.set(pos + 2, true);
         } else {
-            board.set(pos, 0);
-            board.set(pos + 1, 0);
-            board.set(pos + 2, 1);
+            board.set(pos, false);
+            board.set(pos - 1, false);
+            board.set(pos - 2, true);
         }
         return board;
     }
 
-    private ArrayList<ArrayList<BoardTree.Board>> getSolution() {
-        return BT.getSolutionAL();
+    public void showSolutions() {
+        BoardTree.showCompleteSolution(BT.getTreeInArrayList(), BOARD_SIZE);
+    }
+
+    public void showTries() {
+        BoardTree.showAllSolution(BT.getTreeInArrayList(), BOARD_SIZE);
     }
 }

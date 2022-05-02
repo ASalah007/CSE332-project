@@ -1,32 +1,30 @@
-import solution2.BoardSet;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
 
 public class BoardTree {
     private final Board head;
-    ArrayList<ArrayList<Board>> solutionAL;
+    ArrayList<ArrayList<Board>> treeInArrayList;
 
     public static void main(String[] args) {
 
     }
 
     static class Board {
-        private final ArrayList<Integer> boardAL;
-        private final long boardINT;
+        private final BitSet boardBitSet;
+        private final int BOARD_SIZE;
         private final ArrayList<Board> children;
 
-        public Board(ArrayList<Integer> boardAL) {
-            this.boardAL = new ArrayList<>(boardAL);
-            boardINT = getBoardInNum(this.boardAL);
+        public Board(BitSet boardBitSet, int BOARD_SIZE) {
+            this.BOARD_SIZE = BOARD_SIZE;
+            this.boardBitSet = new BitSet();
+            for (int i = 1; i < BOARD_SIZE + 1; i++) {
+                this.boardBitSet.set(i, boardBitSet.get(i));
+            }
             children = new ArrayList<>();
         }
 
-        public ArrayList<Integer> getBoardAL() {
-            return boardAL;
-        }
-
-        public long getBoardINT() {
-            return boardINT;
+        public BitSet getBoardBitSet() {
+            return boardBitSet;
         }
 
         public ArrayList<Board> getChildren() {
@@ -37,50 +35,12 @@ public class BoardTree {
             this.children.add(b);
         }
 
-        private static long setBitOne(long num, int pos) {
-            return num | (1L << pos);
-        }
-
-        private static long setBitZero(long num, int pos) {
-            return num & ~(1L << pos);
-        }
-
-        // not needed
-        private static long getBoardInNum(int BOARD_SIZE, int blank_pos) {
-            long num = 0;
+        public static void showBoard(Board b, int BOARD_SIZE) {
             for (int i = 1; i <= BOARD_SIZE; i++) {
-                num |= (1L << i);
-            }
-            num &= ~(1L << blank_pos);
-
-            return num;
-        }
-
-        private static long getBoardInNum(ArrayList<Integer> integerAL) {
-            long num = 0;
-            for (int i = 1; i < integerAL.size(); i++) {
-                if (integerAL.get(i) == 1) {
-                    num |= (1L << i);
-                }
-            }
-            return num;
-        }
-
-        private static ArrayList<Integer> getBoardInArrayList(long num, int BOARD_SIZE) {
-            ArrayList<Integer> intAL = new ArrayList<>();
-            int temp = 0;
-
-            intAL.add(0, temp);
-            for (int i = 1; i <= BOARD_SIZE; i++) {
-                temp = (int) ((num & (1 << i)) >> i);
-                intAL.add(i, temp);
-            }
-            return intAL;
-        }
-
-        public static void showBoard(Board b) {
-            for (int i = 1;  i < b.boardAL.size(); i++) {
-                System.out.printf("%2d\t", b.boardAL.get(i));
+                if (b.boardBitSet.get(i))
+                    System.out.printf("%2d\t", 1);
+                else
+                    System.out.printf("%2d\t", 0);
             }
         }
     }
@@ -89,54 +49,64 @@ public class BoardTree {
         this.head = head;
     }
 
-    public BoardTree(ArrayList<Integer> bAL) {
-        this.head = new Board(bAL);
+    public BoardTree(BitSet boardBitSet, int BOARD_SIZE) {
+        this.head = new Board(boardBitSet, BOARD_SIZE);
     }
 
     public Board getHead() {
         return head;
     }
 
-    public ArrayList<ArrayList<Board>> getSolutionAL() {
-        solutionAL = new ArrayList<>();
+    public void traverseTree() {
+        treeInArrayList = new ArrayList<>();
         ArrayList<Board> tempBoardsQueueMain = new ArrayList<>();
         Board chainingBoard = head;
 
         tempBoardsQueueMain.add(chainingBoard);
         if (chainingBoard.children.size() != 0) {
-            getSolutionAL(chainingBoard.children.get(0), new ArrayList<>(tempBoardsQueueMain));
+            getTreeInArrayList(chainingBoard.children.get(0), new ArrayList<>(tempBoardsQueueMain));
         }
         for (int i = 1; i < chainingBoard.children.size(); i++) {
-            getSolutionAL(chainingBoard.children.get(i), new ArrayList<>(tempBoardsQueueMain));
+            getTreeInArrayList(chainingBoard.children.get(i), new ArrayList<>(tempBoardsQueueMain));
         }
-        return solutionAL;
     }
 
-    public void getSolutionAL(Board node, ArrayList<Board> queueMain) {
+    public ArrayList<ArrayList<Board>> getTreeInArrayList() {
+        return treeInArrayList;
+    }
+
+    public void getTreeInArrayList(Board node, ArrayList<Board> queueMain) {
 
         queueMain.add(node);
         if (node.children.size() != 0) {
-            getSolutionAL(node.children.get(0), new ArrayList<>(queueMain));
+            getTreeInArrayList(node.children.get(0), new ArrayList<>(queueMain));
         } else {
-            solutionAL.add(queueMain);
+            treeInArrayList.add(queueMain);
         }
         for (int i = 1; i < node.children.size(); i++) {
-            getSolutionAL(node.children.get(i), new ArrayList<>(queueMain));
+            getTreeInArrayList(node.children.get(i), new ArrayList<>(queueMain));
         }
     }
 
-    public static void showAllSolution(ArrayList<ArrayList<Board>> ArrArrBoard) {
+    public static void showAllSolution(ArrayList<ArrayList<Board>> ArrArrBoard, int BOARD_SIZE) {
+        int solutionNo = 0;
         for (ArrayList<Board> ArrBoard : ArrArrBoard) {
+            System.out.println("//****************************************************//");
+            System.out.println("Try number: " + ++solutionNo);
+            int i = 0;
             for (Board b : ArrBoard) {
-                Board.showBoard(b);
+                System.out.printf("Step %2d :\t", i++);
+                Board.showBoard(b, BOARD_SIZE);
                 System.out.println();
             }
+            System.out.println("//****************************************************//");
         }
     }
 
-    public static void showCompleteSolution(ArrayList<ArrayList<Board>> arrArrBoard, int target) {
+    public static void showCompleteSolution(ArrayList<ArrayList<Board>> arrArrBoard, int boardSize) {
         int solutionNo = 0;
         int largestArrBoard = 0;
+        int target = boardSize - 1;
         for (ArrayList<Board> arrBoard : arrArrBoard) {
             if (arrBoard.size() == target) {
                 System.out.println("//****************************************************//");
@@ -145,12 +115,12 @@ public class BoardTree {
                 int i = 0;
                 for (Board b : arrBoard) {
                     System.out.printf("Step %2d :\t", i++);
-                    Board.showBoard(b);
+                    Board.showBoard(b, boardSize);
                     System.out.println();
                 }
                 System.out.println("//****************************************************//");
             }
-            if (arrBoard.size() > largestArrBoard){
+            if (arrBoard.size() > largestArrBoard) {
                 largestArrBoard = arrBoard.size();
             }
         }
@@ -165,7 +135,7 @@ public class BoardTree {
                     int i = 0;
                     for (Board b : arrBoard) {
                         System.out.printf("Step %2d :\t", i++);
-                        Board.showBoard(b);
+                        Board.showBoard(b, boardSize);
                         System.out.println();
                     }
                     System.out.println("Unsolvable Board");

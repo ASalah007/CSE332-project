@@ -64,7 +64,8 @@ public class PegSolitaireSolver {
             else if (p1.size() < p2.size())
                 return -1;
             else {
-                for (int i = p1.size() - 1; i >= 0; i--)
+                int N = Math.max(p1.length(), p2.length());
+                for (int i = N; i >= 0; i--)
                     if ((p1.get(i) ^ p2.get(i)) && p1.get(i))
                         return 1;
                     else if ((p1.get(i) ^ p2.get(i)) && p2.get(i))
@@ -90,22 +91,15 @@ public class PegSolitaireSolver {
         solveBoard(initialBoard);
     }
 
-    public static BitSet makeNewBitSet(BitSet oldBitSet, int withSize) {
-        BitSet newBitSet = new BitSet();
-        for (int i = 0; i <= withSize; i++)
-            newBitSet.set(i, oldBitSet.get(i));
-
-        return newBitSet;
-    }
-
     public void solveBoard(BoardTree.Board node) {
 
         BoardTree.Board tryBoard;
         BitSet tryBitSet;
+
         // tries moving all pegs to the right of the board
         for (int i = 3; i <= BOARD_SIZE; i++) {
             if (validateMove(node.getBoardBitSet(), i, RIGHT)) {
-                tryBitSet = makeNewBitSet(node.getBoardBitSet(), BOARD_SIZE);
+                tryBitSet = (BitSet) node.getBoardBitSet().clone();
                 move(tryBitSet, i, RIGHT);
                 tryBoard = new BoardTree.Board(tryBitSet, BOARD_SIZE);
                 if (!memory.contains(tryBoard.getBoardBitSet())) {
@@ -118,7 +112,7 @@ public class PegSolitaireSolver {
         // tries moving all pegs to the left of the board
         for (int i = 1; i <= BOARD_SIZE - 2; i++) {
             if (validateMove(node.getBoardBitSet(), i, LEFT)) {
-                tryBitSet = makeNewBitSet(node.getBoardBitSet(), BOARD_SIZE);
+                tryBitSet = (BitSet) node.getBoardBitSet().clone();
                 move(tryBitSet, i, LEFT);
                 tryBoard = new BoardTree.Board(tryBitSet, BOARD_SIZE);
                 if (!memory.contains(tryBoard.getBoardBitSet())) {

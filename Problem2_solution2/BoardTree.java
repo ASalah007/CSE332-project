@@ -16,10 +16,8 @@ public class BoardTree {
 
         public Board(BitSet boardBitSet, int BOARD_SIZE) {
             this.BOARD_SIZE = BOARD_SIZE;
-            this.boardBitSet = new BitSet();
-            for (int i = 1; i < BOARD_SIZE + 1; i++) {
-                this.boardBitSet.set(i, boardBitSet.get(i));
-            }
+            this.boardBitSet = (BitSet) boardBitSet.clone();
+
             children = new ArrayList<>();
         }
 

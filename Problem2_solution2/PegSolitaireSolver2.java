@@ -110,7 +110,7 @@ public class PegSolitaireSolver {
             }
         }
         // tries moving all pegs to the left of the board
-        for (int i = 1; i <= BOARD_SIZE - 2; i++) {
+        for (int i = BOARD_SIZE - 2; i >= 1; i--) {
             if (validateMove(node.getBoardBitSet(), i, LEFT)) {
                 tryBitSet = (BitSet) node.getBoardBitSet().clone();
                 move(tryBitSet, i, LEFT);

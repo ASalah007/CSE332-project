@@ -68,7 +68,6 @@ public:
         }
     }
 
-
 };
 
 void simulate(knight whiteKnights[3] , knight blackKnights[3]){
@@ -87,7 +86,7 @@ void simulate(knight whiteKnights[3] , knight blackKnights[3]){
 
 }
 
-bool whiteMove(const pair<int,int> &a , const pair<int,int> &b){
+bool blackMove(const pair<int,int> &a , const pair<int,int> &b){
     if(a.second %2 ==0 && b.second%2==0){
         return b.first < a.first;
     }
@@ -97,7 +96,7 @@ bool whiteMove(const pair<int,int> &a , const pair<int,int> &b){
     return false;
 
 }
-bool blackMove(const pair<int,int> &a , const pair<int,int> &b){
+bool whiteMove(const pair<int,int> &a , const pair<int,int> &b){
     if(a.second %2 ==0 && b.second%2==0){
         return a.first < b.first;
     }
@@ -127,47 +126,54 @@ void Invade(knight whiteKnights[3] , knight blackKnights[3]){
 
         vector<pair<int,int>> whiteMoves=whiteKnights[i].knightMoveList();
         sort(whiteMoves.begin(),whiteMoves.end(),whiteMove);
-        if(whiteMoves.size()>0)
+        if(whiteMoves.size()>0 )
             whiteKnights[i].move(whiteMoves[0]);
         vector<pair<int,int>> blackMoves=blackKnights[i].knightMoveList();
         sort(blackMoves.begin(),blackMoves.end(),blackMove);
-        if(blackMoves.size()>0)
+        if(blackMoves.size()>0 )
             blackKnights[i].move(blackMoves[0]);
     }
     Invade(whiteKnights,blackKnights);
 
 }
 
+void solution(knight whiteKnights[3] ,knight blackKnights[3] ){
+
+    //initializing knights
+    for(int i=0; i<3; i++){
+        whiteKnights[i].name="W"+to_string(i);
+        blackKnights[i].name="B"+to_string(i);
+        whiteKnights[i].position=make_pair(3,i);
+        blackKnights[i].position=make_pair(0,i);
+        whiteKnights[i].visits[3][i]=true;
+        blackKnights[i].visits[0][i]=true;
+        marked[0][i]=true;
+        marked[3][i]=true;
+    }
+    whiteKnights[0].targetPosition=make_pair(0,1);
+    whiteKnights[1].targetPosition=make_pair(0,0);
+    whiteKnights[2].targetPosition=make_pair(0,2);
+    blackKnights[0].targetPosition=make_pair(3,1);
+    blackKnights[1].targetPosition=make_pair(3,0);
+    blackKnights[2].targetPosition=make_pair(3,2);
+
+
+    // calling the recursive function
+    Invade(whiteKnights,blackKnights);
+
+    //printing out total number of moves
+    cout << "total number of knight moves=" << cnt;
+
+}
 
 
 int main(){
 
 
-    //initializing knights
-
     knight whiteKnights[3];
     knight blackKnights[3];
-    for(int i=0; i<3; i++){
-        whiteKnights[i].name="W"+to_string(i);
-        blackKnights[i].name="B"+to_string(i);
-        whiteKnights[i].position=make_pair(0,i);
-        blackKnights[i].position=make_pair(3,i);
-        whiteKnights[i].visits[0][i]=true;
-        blackKnights[i].visits[3][i]=true;
-        marked[0][i]=true;
-        marked[3][i]=true;
-
-    }
-
-    whiteKnights[0].targetPosition=make_pair(3,1);
-    whiteKnights[1].targetPosition=make_pair(3,0);
-    whiteKnights[2].targetPosition=make_pair(3,2);
-    blackKnights[0].targetPosition=make_pair(0,1);
-    blackKnights[1].targetPosition=make_pair(0,0);
-    blackKnights[2].targetPosition=make_pair(0,2);
-
-    Invade(whiteKnights,blackKnights);
-  
-    cout << "total number of knight moves=" << cnt;
+    solution(whiteKnights,blackKnights);
 
 }
+
+

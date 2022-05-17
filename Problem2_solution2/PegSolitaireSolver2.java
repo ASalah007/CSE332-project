@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class PegSolitaireSolver {
+public class PegSolitaireSolver2 {
     final private static boolean RIGHT = true;
     final private static boolean LEFT = false;
     final private int BOARD_SIZE;
@@ -33,7 +33,7 @@ public class PegSolitaireSolver {
                 choice = sc.nextInt();
             }
 
-            PegSolitaireSolver pss = new PegSolitaireSolver(BOARD_SIZE, BLANK_INIT_POS);
+            PegSolitaireSolver2 pss = new PegSolitaireSolver2(BOARD_SIZE, BLANK_INIT_POS);
 
             while (true) {
                 if (choice == 1)
@@ -51,7 +51,7 @@ public class PegSolitaireSolver {
         }
     }
 
-    public PegSolitaireSolver(int BOARD_SIZE, int BLANK_INIT_POS) {
+    public PegSolitaireSolver2(int BOARD_SIZE, int BLANK_INIT_POS) {
         this.BOARD_SIZE = BOARD_SIZE;
         solveBoard(BOARD_SIZE, BLANK_INIT_POS);
         BT.traverseTree();
@@ -83,7 +83,7 @@ public class PegSolitaireSolver {
             boardBitSet.set(i, true);
         boardBitSet.set(BLANK_INIT_POS, false);
 
-        initialBoard = new BoardTree.Board(boardBitSet, BOARD_SIZE);
+        initialBoard = new BoardTree.Board(boardBitSet);
         BT = new BoardTree(initialBoard);
         memory = new TreeSet<>(BitSetComparator());
         memory.add(boardBitSet);
@@ -101,7 +101,7 @@ public class PegSolitaireSolver {
             if (validateMove(node.getBoardBitSet(), i, RIGHT)) {
                 tryBitSet = (BitSet) node.getBoardBitSet().clone();
                 move(tryBitSet, i, RIGHT);
-                tryBoard = new BoardTree.Board(tryBitSet, BOARD_SIZE);
+                tryBoard = new BoardTree.Board(tryBitSet);
                 if (!memory.contains(tryBoard.getBoardBitSet())) {
                     node.addChild(tryBoard);
                     memory.add(tryBoard.getBoardBitSet());
@@ -114,7 +114,7 @@ public class PegSolitaireSolver {
             if (validateMove(node.getBoardBitSet(), i, LEFT)) {
                 tryBitSet = (BitSet) node.getBoardBitSet().clone();
                 move(tryBitSet, i, LEFT);
-                tryBoard = new BoardTree.Board(tryBitSet, BOARD_SIZE);
+                tryBoard = new BoardTree.Board(tryBitSet);
                 if (!memory.contains(tryBoard.getBoardBitSet())) {
                     node.addChild(tryBoard);
                     memory.add(tryBoard.getBoardBitSet());
@@ -134,7 +134,7 @@ public class PegSolitaireSolver {
         }
     }
 
-    private BitSet move(BitSet board, int pos, boolean direction) {
+    private void move(BitSet board, int pos, boolean direction) {
         if (direction == LEFT) {
             board.set(pos, false);
             board.set(pos + 1, false);
@@ -144,7 +144,6 @@ public class PegSolitaireSolver {
             board.set(pos - 1, false);
             board.set(pos - 2, true);
         }
-        return board;
     }
 
     public void showSolutions() {

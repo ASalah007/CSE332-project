@@ -11,11 +11,9 @@ public class BoardTree {
 
     static class Board {
         private final BitSet boardBitSet;
-        private final int BOARD_SIZE;
         private final ArrayList<Board> children;
 
-        public Board(BitSet boardBitSet, int BOARD_SIZE) {
-            this.BOARD_SIZE = BOARD_SIZE;
+        public Board(BitSet boardBitSet) {
             this.boardBitSet = (BitSet) boardBitSet.clone();
 
             children = new ArrayList<>();
@@ -23,10 +21,6 @@ public class BoardTree {
 
         public BitSet getBoardBitSet() {
             return boardBitSet;
-        }
-
-        public ArrayList<Board> getChildren() {
-            return children;
         }
 
         public void addChild(Board b) {
@@ -45,14 +39,6 @@ public class BoardTree {
 
     public BoardTree(Board head) {
         this.head = head;
-    }
-
-    public BoardTree(BitSet boardBitSet, int BOARD_SIZE) {
-        this.head = new Board(boardBitSet, BOARD_SIZE);
-    }
-
-    public Board getHead() {
-        return head;
     }
 
     public void traverseTree() {
